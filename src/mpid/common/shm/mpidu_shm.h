@@ -38,7 +38,7 @@ typedef struct MPIDU_shm_seg_info
 
 int MPIDU_shm_seg_alloc(size_t len, void **ptr_p);
 int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *barrier,
-                     int num_local, int local_rank, int local_procs_0, int rank);
+                         int num_local, int local_rank, int local_procs_0, int rank, const char *prefix);
 int MPIDU_shm_seg_destroy(MPIDU_shm_seg_ptr_t memory, int num_local);
 
 int MPIDU_shm_barrier_init(MPIDU_shm_barrier_t *barrier_region,

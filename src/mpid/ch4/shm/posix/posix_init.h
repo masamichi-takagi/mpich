@@ -113,7 +113,7 @@ static inline int MPIDI_SHM_mpi_init_hook(int rank, int size)
     mpi_errno =
         MPIDU_shm_seg_commit(&MPIDI_POSIX_mem_region.memory, &MPIDI_POSIX_mem_region.barrier,
                              num_local, local_rank, MPIDI_POSIX_mem_region.local_procs[0],
-                             MPIDI_POSIX_mem_region.rank);
+                             MPIDI_POSIX_mem_region.rank, "POSIX");
 
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);

@@ -249,12 +249,6 @@ MPL_STATIC_INLINE_PREFIX int MPID_Init(int *argc,
     MPIR_Process.attrs.tag_ub = (1ULL << MPIDI_CH4U_TAG_SHIFT) - 1;
     /* discuss */
 
-    mpi_errno = MPIDI_NM_mpi_init_hook(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
-                                       MPIR_Process.comm_world,
-                                       MPIR_Process.comm_self, has_parent, 1, &netmod_contexts);
-    if (mpi_errno != MPI_SUCCESS) {
-        MPIR_ERR_POPFATAL(mpi_errno);
-    }
 
 #ifdef MPIDI_BUILD_CH4_LOCALITY_INFO
     int i;
@@ -278,6 +272,13 @@ MPL_STATIC_INLINE_PREFIX int MPID_Init(int *argc,
                          MPIDI_CH4_Global.node_map[0][MPIR_Process.comm_world->rank]));
     }
 #endif
+
+    mpi_errno = MPIDI_NM_mpi_init_hook(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
+                                       MPIR_Process.comm_world,
+                                       MPIR_Process.comm_self, has_parent, 1, &netmod_contexts);
+    if (mpi_errno != MPI_SUCCESS) {
+        MPIR_ERR_POPFATAL(mpi_errno);
+    }
 
 #ifdef MPIDI_BUILD_CH4_SHM
     mpi_errno = MPIDI_SHM_mpi_init_hook(rank, size);
@@ -463,6 +464,7 @@ MPL_STATIC_INLINE_PREFIX int MPID_Abort(MPIR_Comm * comm,
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_ABORT);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_ABORT);
 
+    abort();
     if (MPIR_Process.comm_world) {
         int rank = MPIR_Process.comm_world->rank;
         snprintf(world_str, sizeof(world_str), " on node %d", rank);
