@@ -646,7 +646,11 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
             }
         }
 
-        MPIDU_shm_seg_alloc((size * MPIDI_Global.addrnamelen)/num_local, (void **)&shared_addrs);
+        if (local_rank == 0) {
+            MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, (void **)&shared_addrs);
+        } else {
+            MPIDU_shm_seg_alloc(64, (void **)&shared_addrs);
+        }
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_procs[0], rank, "OFI");
         table = memory.base_addr;
 
