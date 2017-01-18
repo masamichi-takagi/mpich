@@ -616,7 +616,14 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         MPIDI_OFI_CALL(fi_getname((fid_t) MPIDI_Global.ep, MPIDI_Global.addrname,
                                   &MPIDI_Global.addrnamelen), getname);
         MPIR_Assert(MPIDI_Global.addrnamelen <= FI_NAME_MAX);
-
+#if 0
+        printf("PUT ");
+        int j;
+        for (j = 0; j < MPIDI_Global.addrnamelen; j++) {
+            printf("%02x", (*(char*)(MPIDI_Global.addrname + j) & 0xff));
+        }
+        printf("\n");
+#endif
         val = valS;
         str_errno = MPL_STR_SUCCESS;
         maxlen = MPIDI_KVSAPPSTRLEN;
@@ -646,32 +653,77 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
             }
         }
 
+        shared_addrs = NULL;
+        memory.base_addr = NULL;
+#if 0
         if (local_rank == 0) {
-            MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, (void **)&shared_addrs);
+#endif
+            MPIDU_shm_seg_alloc(size * (FI_NAME_MAX + MPIDI_KVSAPPSTRLEN), (void **)&shared_addrs);
+#if 0
         } else {
             MPIDU_shm_seg_alloc(64, (void **)&shared_addrs);
         }
+#endif
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_procs[0], rank, "OFI");
-        table = memory.base_addr;
+        table = memory.base_addr + MPIDU_SHM_CACHE_LINE_LEN;
+        printf("ver 1.2\n");
+        printf("memory.base_addr=%p,table=%p,shared_addrs=%p\n", memory.base_addr, table, shared_addrs);
+        if(local_rank == 0 && table != shared_addrs) {
+            assert(0);
+        }
+        //MPIR_Assert(local_rank != 0 || table == shared_addrs);
+        char* straddrs = shared_addrs + size * FI_NAME_MAX;
 
         /* -------------------------------- */
         /* Create our address table from    */
         /* encoded KVS values               */
         /* -------------------------------- */
+#if 0
         if (local_rank == 0) {
+#endif
+            int cur = 0;
             maxlen = MPIDI_KVSAPPSTRLEN;
 
             for (i = 0; i < size; i++) {
                 sprintf(keyS, "OFI-%d", i);
                 MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Get
                                        (MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
+                strncpy(straddrs + i * MPIDI_KVSAPPSTRLEN, valS, MPIDI_KVSAPPSTRLEN);
                 MPIDI_OFI_STR_CALL(MPL_str_get_binary_arg
-                                   (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
-                                    MPIDI_Global.addrnamelen, &maxlen), buscard_len);
+                                   (valS, "OFI", shared_addrs + cur,
+                                    FI_NAME_MAX, &maxlen), buscard_len);
+                MPIR_Assert(maxlen == MPIDI_Global.addrnamelen);
+#if 0
+                int j;
+                for (j = 0; j < maxlen; j++) {
+                    printf("%02x", (*(char*)(table + cur + j) & 0xff));
+                }
+                printf("\n");
+#endif
+                cur += maxlen;
+            }
+#if 0
+        }
+#endif
+        PMI_Barrier();
+#if 0
+        if (local_rank == 0) {
+            for (i = 0; i < num_local; i++) {
+                int j;
+                for(j = 0; j < size; j++) {
+                    int r = memcmp(shared_addrs + j * MPIDI_Global.addrnamelen,
+                                   table + i * size * (FI_NAME_MAX + MPIDI_KVSAPPSTRLEN) + j * MPIDI_Global.addrnamelen,
+                                   MPIDI_Global.addrnamelen);
+                    if (r != 0) {
+                        printf("FAIL(%d,%d):%s vs. %s\n", i, j,
+                               straddrs + j * MPIDI_KVSAPPSTRLEN,
+                               table + i * size * (FI_NAME_MAX + MPIDI_KVSAPPSTRLEN) + size * FI_NAME_MAX + j * MPIDI_KVSAPPSTRLEN
+                               );
+                    }
+                }
             }
         }
-        PMI_Barrier();
-
+#endif        
         /* -------------------------------- */
         /* Table is constructed.  Map it    */
         /* -------------------------------- */
@@ -682,6 +734,8 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
             MPIDI_OFI_AV(&MPIDIU_get_av(0, i)).dest = mapped_table[i];
         }
         MPL_free(mapped_table);
+
+        PMI_Barrier();
 
         MPIDU_shm_seg_destroy(&memory, num_local);
         MPL_free(local_procs);
