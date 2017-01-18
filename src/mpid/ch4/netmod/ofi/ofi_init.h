@@ -654,16 +654,17 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         /* Create our address table from    */
         /* encoded KVS values               */
         /* -------------------------------- */
-        maxlen = MPIDI_KVSAPPSTRLEN;
+        if (local_rank == 0) {
+            maxlen = MPIDI_KVSAPPSTRLEN;
 
-        int start = local_rank * (size/num_local);
-        for (i = start; i < start + (size/num_local); i++) {
-            sprintf(keyS, "OFI-%d", i);
-            MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Get
-                                   (MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
-            MPIDI_OFI_STR_CALL(MPL_str_get_binary_arg
-                               (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
-                                MPIDI_Global.addrnamelen, &maxlen), buscard_len);
+            for (i = 0; i < size; i++) {
+                sprintf(keyS, "OFI-%d", i);
+                MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Get
+                                       (MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
+                MPIDI_OFI_STR_CALL(MPL_str_get_binary_arg
+                                   (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
+                                    MPIDI_Global.addrnamelen, &maxlen), buscard_len);
+            }
         }
         PMI_Barrier();
 
