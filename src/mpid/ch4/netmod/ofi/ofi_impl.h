@@ -18,6 +18,25 @@
 #include "ch4_impl.h"
 #include "ofi_iovec_util.h"
 
+static inline uint64_t rdtsc_light()
+{
+    uint64_t x;
+#ifdef __MIC__
+    //    __asm__ __volatile__("xorl %%eax, %%eax; cpuid;" : : : "%rax", "%rbx"\
+    , "%rcx", "%rdx");
+__asm__ __volatile__("rdtsc;" "shl $32, %%rdx;" "or %%rdx, %%rax":"=a"(x)::\
+                     "%rdx", "memory");
+#else
+__asm__ __volatile__("rdtscp;"      /* rdtscp don't jump over earlier instr\
+                                       uctions */
+                     "shl $32, %%rdx;" "or %%rdx, %%rax":"=a"(x)::"%rcx", "\
+%rdx", "memory");
+#endif
+return x;
+}
+extern uint64_t rdtsc_sum[16];
+extern uint64_t rdtsc_start;
+
 #define MPIDI_OFI_DT(dt)         ((dt)->dev.netmod.ofi)
 #define MPIDI_OFI_OP(op)         ((op)->dev.netmod.ofi)
 #define MPIDI_OFI_COMM(comm)     ((comm)->dev.ch4.netmod.ofi)

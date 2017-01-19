@@ -646,9 +646,12 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
 
         /* All ranks instruct the representative rank to map
            one shared memory segment. The start address is stored in "table" */
-        MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, &table);
+        MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, (void**)&table);
+        rdtsc_start = rdtsc_light();
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_procs[0], rank, "OFI");
+        rdtsc_sum[0] = rdtsc_sum[0] + (rdtsc_light() - rdtsc_start);
 
+        rdtsc_start = rdtsc_light();
         /* -------------------------------- */
         /* Create our address table from    */
         /* encoded KVS values               */
@@ -664,6 +667,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
                                (valS, "OFI", table + i * MPIDI_Global.addrnamelen,
                                 MPIDI_Global.addrnamelen, &maxlen), buscard_len);
         }
+        rdtsc_sum[1] = rdtsc_sum[1] + (rdtsc_light() - rdtsc_start);
         PMI_Barrier();
         /* -------------------------------- */
         /* Table is constructed.  Map it    */
@@ -862,6 +866,8 @@ static inline int MPIDI_NM_mpi_finalize_hook(void)
     MPID_Thread_mutex_destroy(&MPIDI_OFI_THREAD_PROGRESS_MUTEX, &thr_err);
     MPID_Thread_mutex_destroy(&MPIDI_OFI_THREAD_FI_MUTEX, &thr_err);
     MPID_Thread_mutex_destroy(&MPIDI_OFI_THREAD_SPAWN_MUTEX, &thr_err);
+    
+    printf("KVS-commit:%ld,KVS-get:%ld\n", rdtsc_sum[0], rdtsc_sum[1]);
 
   fn_exit:
     return mpi_errno;
