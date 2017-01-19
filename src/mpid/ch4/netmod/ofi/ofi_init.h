@@ -602,7 +602,6 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
                                                      &MPIDI_Global.ep, 0));
 
     if (do_av_insert) {
-        char *shared_addrs;
         int *local_procs, *local_ranks;
         int num_local = 0, local_rank = -1;
         MPIDU_shm_seg_t memory;
@@ -645,31 +644,25 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
             }
         }
 
-        shared_addrs = NULL;
-        memory.base_addr = NULL;
-        MPIDU_shm_seg_alloc(size * (FI_NAME_MAX + MPIDI_KVSAPPSTRLEN), (void **)&shared_addrs);
+        /* All ranks instruct the representative rank to map
+           one shared memory segment. The start address is stored in "table" */
+        MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, &table);
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_procs[0], rank, "OFI");
-        table = memory.base_addr + MPIDU_SHM_CACHE_LINE_LEN;
-        char* straddrs = shared_addrs + size * FI_NAME_MAX;
 
         /* -------------------------------- */
         /* Create our address table from    */
         /* encoded KVS values               */
         /* -------------------------------- */
-        int cur = 0;
         maxlen = MPIDI_KVSAPPSTRLEN;
-        if (local_rank == 0) {
-            for (i = 0; i < size; i++) {
-                sprintf(keyS, "OFI-%d", i);
-                MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Get
-                                       (MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
-                strncpy(straddrs + i * MPIDI_KVSAPPSTRLEN, valS, MPIDI_KVSAPPSTRLEN);
-                MPIDI_OFI_STR_CALL(MPL_str_get_binary_arg
-                                   (valS, "OFI", shared_addrs + cur,
-                                    FI_NAME_MAX, &maxlen), buscard_len);
-                MPIR_Assert(maxlen == MPIDI_Global.addrnamelen);
-                cur += maxlen;
-            }
+        
+        int start = local_rank * (size/num_local);
+        for (i = start; i < start + (size/num_local); i++) {
+            sprintf(keyS, "OFI-%d", i);
+            MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Get
+                                   (MPIDI_Global.kvsname, keyS, valS, MPIDI_KVSAPPSTRLEN), pmi);
+            MPIDI_OFI_STR_CALL(MPL_str_get_binary_arg
+                               (valS, "OFI", table + i * MPIDI_Global.addrnamelen,
+                                MPIDI_Global.addrnamelen, &maxlen), buscard_len);
         }
         PMI_Barrier();
         /* -------------------------------- */
