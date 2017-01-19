@@ -647,10 +647,12 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         /* All ranks instruct the representative rank to map
            one shared memory segment. The start address is stored in "table" */
         MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, (void**)&table);
+        printf("shm:%d\n", size * MPIDI_Global.addrnamelen);
         rdtsc_start = rdtsc_light();
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_procs[0], rank, "OFI");
         rdtsc_sum[0] = rdtsc_sum[0] + (rdtsc_light() - rdtsc_start);
-
+        MPL_free(local_procs);
+        MPL_free(local_ranks);
         rdtsc_start = rdtsc_light();
         /* -------------------------------- */
         /* Create our address table from    */
@@ -669,6 +671,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         }
         rdtsc_sum[1] = rdtsc_sum[1] + (rdtsc_light() - rdtsc_start);
         PMI_Barrier();
+        printf("kv:%d\n", size * (strlen(keyS), + strlen(valS)));
         /* -------------------------------- */
         /* Table is constructed.  Map it    */
         /* -------------------------------- */
@@ -683,8 +686,6 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         PMI_Barrier();
 
         MPIDU_shm_seg_destroy(&memory, num_local);
-        MPL_free(local_procs);
-        MPL_free(local_ranks);
     }
 
     /* -------------------------------- */

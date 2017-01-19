@@ -10,8 +10,8 @@
  */
 #include <mpidimpl.h>
 #include "ofi_impl.h"
-extern uint64_t rdtsc_sum[16] = { 0 };
-extern uint64_t rdtsc_start;
+uint64_t rdtsc_sum[16] = { 0 };
+uint64_t rdtsc_start;
 MPIDI_OFI_global_t MPIDI_Global = { 0 };
 MPIDI_OFI_capabilities_t MPIDI_OFI_caps_list[MPIDI_OFI_NUM_SETS] =
 
