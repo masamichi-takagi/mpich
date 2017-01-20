@@ -156,7 +156,7 @@ void HYD_pmcd_free_pmi_kvs_list(struct HYD_pmcd_pmi_kvs *kvs_list)
 
 HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_kvs *kvs, int *ret)
 {
-    struct HYD_pmcd_pmi_kvs_pair *key_pair, *run, *last;
+    struct HYD_pmcd_pmi_kvs_pair *key_pair;
     HYD_status status = HYD_SUCCESS;
 
     HYDU_FUNC_ENTER();
@@ -173,6 +173,9 @@ HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_
         kvs->key_pair = key_pair;
     }
     else {
+#ifdef HAVE_ERROR_CHECKING
+        struct HYD_pmcd_pmi_kvs_pair *run, *last;
+
         for (run = kvs->key_pair; run; run = run->next) {
             if (!strcmp(run->key, key_pair->key)) {
                 /* duplicate key found */
@@ -183,6 +186,10 @@ HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_
         }
         /* Add key_pair to end of list. */
         last->next = key_pair;
+#else
+        key_pair->next = kvs->key_pair;
+        kvs->key_pair = key_pair;
+#endif
     }
 
   fn_exit:
