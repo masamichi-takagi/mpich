@@ -8,6 +8,8 @@
 #include "common.h"
 #include "topo.h"
 
+static struct HYD_pmcd_pmi_kvs_pair *tail = NULL;
+
 void HYD_pmcd_init_header(struct HYD_pmcd_hdr *hdr)
 {
     hdr->cmd = INVALID_CMD;
@@ -171,9 +173,10 @@ HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_
 
     if (kvs->key_pair == NULL) {
         kvs->key_pair = key_pair;
+        tail = key_pair;
     }
     else {
-#ifdef HAVE_ERROR_CHECKING
+#if 0
         struct HYD_pmcd_pmi_kvs_pair *run, *last;
 
         for (run = kvs->key_pair; run; run = run->next) {
@@ -187,8 +190,8 @@ HYD_status HYD_pmcd_pmi_add_kvs(const char *key, char *val, struct HYD_pmcd_pmi_
         /* Add key_pair to end of list. */
         last->next = key_pair;
 #else
-        key_pair->next = kvs->key_pair;
-        kvs->key_pair = key_pair;
+        tail->next = key_pair;
+        tail = key_pair;
 #endif
     }
 
