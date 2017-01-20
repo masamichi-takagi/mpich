@@ -632,7 +632,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         for (i = 0; i < 1024; i++) {
             char _val[MPIDI_KVSAPPSTRLEN];
             char _key[MPIDI_KVSAPPSTRLEN];
-            sprintf(_key, "OFI-DUMMY-%d", rank);
+            sprintf(_key, "OFI-DUMMY-%d-%d", rank, i);
             sprintf(_val, "40 bytes of dummy string    0123456789");
             MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Put(MPIDI_Global.kvsname, _key, _val), pmi);
             MPIDI_OFI_PMI_CALL_POP(PMI_KVS_Commit(MPIDI_Global.kvsname), pmi);
