@@ -10,6 +10,9 @@
 #include "demux.h"
 #include "topo.h"
 
+uint64_t rdtsc_sum[16];
+uint64_t rdtsc_start;
+
 #define debug(...)                              \
     {                                           \
         if (HYD_pmcd_pmip.user_global.debug)    \
@@ -377,6 +380,7 @@ static HYD_status fn_get_usize(int fd, char *args[])
 
 static HYD_status fn_get(int fd, char *args[])
 {
+    rdtsc_start = rdtsc_light();
     struct HYD_string_stash stash;
     char *cmd, *key, *val;
     struct HYD_pmcd_token *tokens;
@@ -436,6 +440,7 @@ static HYD_status fn_get(int fd, char *args[])
   fn_exit:
     HYD_pmcd_pmi_free_tokens(tokens, token_count);
     HYDU_FUNC_EXIT();
+    rdtsc_sum[1] = rdtsc_sum[1] + (rdtsc_light() - rdtsc_start);
     return status;
 
   fn_fail:
@@ -491,6 +496,7 @@ static HYD_status fn_put(int fd, char *args[])
 
 static HYD_status fn_keyval_cache(int fd, char *args[])
 {
+    rdtsc_start = rdtsc_light();
     struct HYD_pmcd_token *tokens;
     int token_count, i;
     HYD_status status = HYD_SUCCESS;
@@ -516,6 +522,7 @@ static HYD_status fn_keyval_cache(int fd, char *args[])
   fn_exit:
     HYD_pmcd_pmi_free_tokens(tokens, token_count);
     HYDU_FUNC_EXIT();
+    rdtsc_sum[0] = rdtsc_sum[0] + (rdtsc_light() - rdtsc_start);
     return status;
 
   fn_fail:
@@ -605,6 +612,7 @@ static HYD_status fn_finalize(int fd, char *args[])
 
   fn_exit:
     HYDU_FUNC_EXIT();
+    printf("keyval_cache:%ld,get:%ld\n", rdtsc_sum[0], rdtsc_sum[1]);
     return status;
 
   fn_fail:

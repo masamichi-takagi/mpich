@@ -30,7 +30,7 @@ HYD_status HYD_pmcd_pmi_finalize(void)
     HYD_status status = HYD_SUCCESS;
 
     HYDU_FUNC_ENTER();
-
+    printf("bcast_keyvals:%ld,parse_pmi_cmd:%ld,add_kvs:%ld\n", rdtsc_sum[0], rdtsc_sum[1], rdtsc_sum[2]);
     HYDU_FUNC_EXIT();
     return status;
 }

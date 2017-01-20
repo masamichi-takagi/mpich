@@ -11,6 +11,9 @@
 #include "pmiserv_pmi.h"
 #include "pmiserv_utils.h"
 
+uint64_t rdtsc_sum[16];
+uint64_t rdtsc_start;
+
 static HYD_status cmd_response(int fd, int pid, const char *cmd)
 {
     struct HYD_pmcd_hdr hdr;
@@ -46,6 +49,7 @@ static HYD_status cmd_response(int fd, int pid, const char *cmd)
 
 static HYD_status bcast_keyvals(int fd, int pid)
 {
+    rdtsc_start = rdtsc_light();
     int keyval_count, arg_count, i, j;
     char **tmp = NULL, *cmd;
     struct HYD_pmcd_pmi_kvs_pair *run;
@@ -127,6 +131,7 @@ static HYD_status bcast_keyvals(int fd, int pid)
     if (tmp)
         MPL_free(tmp);
     HYDU_FUNC_EXIT();
+    rdtsc_sum[0] = rdtsc_sum[0] + (rdtsc_light() - rdtsc_start);
     return status;
 
   fn_fail:
@@ -178,17 +183,21 @@ static HYD_status fn_put(int fd, int pid, int pgid, char *args[])
 
     HYDU_FUNC_ENTER();
 
+    rdtsc_start = rdtsc_light();
     status = HYD_pmcd_pmi_args_to_tokens(args, &tokens, &token_count);
+    rdtsc_sum[1] += (rdtsc_light() - rdtsc_start);
     HYDU_ERR_POP(status, "unable to convert args to tokens\n");
 
     proxy = HYD_pmcd_pmi_find_proxy(fd);
     HYDU_ASSERT(proxy, status);
     pg_scratch = (struct HYD_pmcd_pmi_pg_scratch *) proxy->pg->pg_scratch;
 
+    rdtsc_start = rdtsc_light();
     for (i = 0; i < token_count; i++) {
         status = HYD_pmcd_pmi_add_kvs(tokens[i].key, tokens[i].val, pg_scratch->kvs, &ret);
         HYDU_ERR_POP(status, "unable to add keypair to kvs\n");
     }
+    rdtsc_sum[2] += (rdtsc_light() - rdtsc_start);
 
   fn_exit:
     HYD_pmcd_pmi_free_tokens(tokens, token_count);
