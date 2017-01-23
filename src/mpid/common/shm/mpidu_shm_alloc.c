@@ -360,8 +360,14 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
             mpi_errno = MPIDU_shm_barrier_init((MPIDU_shm_barrier_t *) memory->base_addr, barrier, TRUE);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
+            {
+                //struct timeval tv_start, tv_stop;
+                //gettimeofday(&tv_start, NULL);
             pmi_errno = PMI_Barrier();
             MPIR_ERR_CHKANDJUMP1 (pmi_errno != PMI_SUCCESS, mpi_errno, MPI_ERR_OTHER, "**pmi_barrier", "**pmi_barrier %d", pmi_errno);
+            //gettimeofday(&tv_stop, NULL);
+            //printf("shm_seg_commit-PMI_Barrier %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+            }
         }
         else
         {

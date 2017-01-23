@@ -118,7 +118,13 @@ MPL_STATIC_INLINE_PREFIX int MPID_Init(int *argc,
     MPIDI_CH4_DBG_MEMORY = MPL_dbg_class_alloc("CH4_MEMORY", "ch4_memory");
 #endif
     MPIDI_choose_netmod();
+    {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
     pmi_errno = PMI_Init(&has_parent);
+    gettimeofday(&tv_stop, NULL);
+        printf("PMI_Init %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    }    
 
     if (pmi_errno != PMI_SUCCESS) {
         MPIR_ERR_SETANDJUMP1(pmi_errno, MPI_ERR_OTHER, "**pmi_init", "**pmi_init %d", pmi_errno);
@@ -223,15 +229,27 @@ MPL_STATIC_INLINE_PREFIX int MPID_Init(int *argc,
     }
 #endif
 
+    {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
     mpi_errno = MPIDI_NM_mpi_init_hook(rank, size, appnum, &MPIR_Process.attrs.tag_ub,
                                        MPIR_Process.comm_world,
                                        MPIR_Process.comm_self, has_parent, 1, &netmod_contexts);
+    gettimeofday(&tv_stop, NULL);
+        printf("MPIDI_NM_mpi_init_hook %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    }    
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POPFATAL(mpi_errno);
     }
 
 #ifdef MPIDI_BUILD_CH4_SHM
+    {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
     mpi_errno = MPIDI_SHM_mpi_init_hook(rank, size);
+    gettimeofday(&tv_stop, NULL);
+        printf("MPIDI_SHM_mpi_init_hook %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    }    
 
     if (mpi_errno != MPI_SUCCESS) {
         MPIR_ERR_POPFATAL(mpi_errno);
@@ -295,6 +313,8 @@ MPL_STATIC_INLINE_PREFIX int MPID_InitCompleted(void)
 MPL_STATIC_INLINE_PREFIX int MPID_Finalize(void)
 {
     int mpi_errno, thr_err;
+    struct timeval tv_start, tv_stop;
+    gettimeofday(&tv_start, NULL);
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPID_FINALIZE);
     MPIR_FUNC_VERBOSE_ENTER(MPID_STATE_MPID_FINALIZE);
 
