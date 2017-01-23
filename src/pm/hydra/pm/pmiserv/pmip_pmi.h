@@ -10,6 +10,19 @@
 #include "hydra.h"
 #include "common.h"
 
+static inline uint64_t rdtsc_light()
+{
+        uint64_t x;
+#ifdef __MIC__
+__asm__ __volatile__("rdtsc;" "shl $32, %%rdx;" "or %%rdx, %%rax":"=a"(x)::"%rdx", "memory");
+#else
+__asm__ __volatile__("rdtscp;" "shl $32, %%rdx;" "or %%rdx, %%rax":"=a"(x)::"%rcx", "%rdx", "memory");
+#endif
+return x;
+}
+extern uint64_t rdtsc_sum[16];
+extern uint64_t rdtsc_start;
+
 /* PMI-1 specific definitions */
 extern struct HYD_pmcd_pmip_pmi_handle *HYD_pmcd_pmip_pmi_v1;
 
