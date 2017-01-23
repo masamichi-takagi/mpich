@@ -175,7 +175,13 @@ int MPI_Init( int *argc, char ***argv )
     if (MPIR_CVAR_ASYNC_PROGRESS)
         threadLevel = MPI_THREAD_MULTIPLE;
 
+    {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
     mpi_errno = MPIR_Init_thread( argc, argv, threadLevel, &provided );
+    gettimeofday(&tv_stop, NULL);
+        printf("MPIR_Init_thread %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    }    
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     if (MPIR_CVAR_ASYNC_PROGRESS) {

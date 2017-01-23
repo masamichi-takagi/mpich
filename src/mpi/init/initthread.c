@@ -420,7 +420,13 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
        intially NULL and will be allocated by the device if the process group
        was started using one of the MPI_Comm_spawn functions. */
     MPIR_Process.comm_world		    = MPIR_Comm_builtin + 0;
+    {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
     MPII_Comm_init(MPIR_Process.comm_world);
+    gettimeofday(&tv_stop, NULL);
+        printf("MPII_Comm_init %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    }    
     MPIR_Process.comm_world->handle	    = MPI_COMM_WORLD;
     MPIR_Process.comm_world->context_id	    = 0 << MPIR_CONTEXT_PREFIX_SHIFT;
     MPIR_Process.comm_world->recvcontext_id = 0 << MPIR_CONTEXT_PREFIX_SHIFT;
@@ -501,8 +507,14 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     info_ptr->key   = NULL;
     info_ptr->value = NULL;
     
+    {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
     mpi_errno = MPID_Init(argc, argv, required, &thread_provided, 
 			  &has_args, &has_env);
+    gettimeofday(&tv_stop, NULL);
+        printf("MPID_Init %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    }    
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
     /* Assert: tag_ub should be a power of 2 minus 1 */

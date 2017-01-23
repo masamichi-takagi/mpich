@@ -643,8 +643,17 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         }
 
         MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, (void **)&table);
+        {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_rank_0, rank);
+        gettimeofday(&tv_stop, NULL);
+        printf("shm_seg_commit %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        }
 
+        {
+        struct timeval tv_start, tv_stop;
+        gettimeofday(&tv_start, NULL);
         /* -------------------------------- */
         /* Create our address table from    */
         /* encoded KVS values               */
@@ -660,6 +669,9 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
             MPIDI_OFI_STR_CALL(MPL_str_get_binary_arg
                                (valS, "OFI", (char *) &table[i * MPIDI_Global.addrnamelen],
                                 MPIDI_Global.addrnamelen, &maxlen), buscard_len);
+        }
+        gettimeofday(&tv_stop, NULL);
+        printf("PMI_KVS_Get %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         }
         PMI_Barrier();
 
