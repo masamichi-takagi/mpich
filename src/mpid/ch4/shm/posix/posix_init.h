@@ -36,6 +36,8 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
     MPIDI_POSIX_cell_t(*cells_p)[MPIDI_POSIX_NUM_CELLS];
     MPIDI_POSIX_queue_t *recv_queues_p = NULL;
     MPIDI_POSIX_queue_t *free_queues_p = NULL;
+    struct timeval tv_start, tv_stop, tv_start2, tv_stop2;
+    gettimeofday(&tv_start, NULL);
     MPIR_CHKPMEM_DECL(9);
     MPIR_FUNC_VERBOSE_STATE_DECL(MPID_STATE_MPIDI_POSIX_INIT);
 
@@ -109,6 +111,10 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
+    gettimeofday(&tv_stop, NULL);
+    printf("shm_posix_init-shm_seg_alloc %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    gettimeofday(&tv_start, NULL);
+
     /* Actually allocate the segment and assign regions to the pointers */
     mpi_errno =
         MPIDU_shm_seg_commit(&MPIDI_POSIX_mem_region.memory, &MPIDI_POSIX_mem_region.barrier,
@@ -117,6 +123,10 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
 
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
+
+    gettimeofday(&tv_stop, NULL);
+    printf("shm_posix_init-shm_seg_commit %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    gettimeofday(&tv_start, NULL);
 
     /* post check_alloc steps */
     if (MPIDI_POSIX_mem_region.memory.symmetrical == 1) {
@@ -140,6 +150,10 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
 
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
+
+    gettimeofday(&tv_stop, NULL);
+    printf("shm_posix_init-shm_barrier %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    gettimeofday(&tv_start, NULL);
 
     /* find our cell region */
     MPIDI_POSIX_mem_region.Elements = cells_p[local_rank];
@@ -187,6 +201,10 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
     if (mpi_errno)
         MPIR_ERR_POP(mpi_errno);
 
+    gettimeofday(&tv_stop, NULL);
+    printf("shm_posix_init-shm_barrier2 %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    gettimeofday(&tv_start, NULL);
+
     /* Allocate table of pointers to fastboxes */
     MPIR_CHKPMEM_MALLOC(MPIDI_POSIX_mem_region.mailboxes.in, MPIDI_POSIX_fastbox_t **,
                         num_local * sizeof(MPIDI_POSIX_fastbox_t *), mpi_errno, "fastboxes");
@@ -218,6 +236,9 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
 #undef MPIDI_POSIX_MAILBOX_INDEX
 
     MPIR_CHKPMEM_COMMIT();
+    gettimeofday(&tv_stop, NULL);
+    printf("shm_posix_init-epilogue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+
   fn_exit:
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDI_POSIX_INIT);
     return mpi_errno;
