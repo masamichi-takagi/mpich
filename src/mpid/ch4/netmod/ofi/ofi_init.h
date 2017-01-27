@@ -325,7 +325,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
     hints->rx_attr->total_buffered_recv = 0;    /* FI_RM_ENABLED ensures buffering of unexpected messages */
     hints->ep_attr->type = FI_EP_RDM;
         gettimeofday(&tv_stop, NULL);
-        printf("provider_init-set_caps %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        printf("provider_init1-set_caps %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
 
     /* ------------------------------------------------------------------------ */
@@ -341,7 +341,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         gettimeofday(&tv_start2, NULL);
         MPIDI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, NULL, &prov), addrinfo);
         gettimeofday(&tv_stop2, NULL);
-        printf("provider_init-fi_getinfo %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
+        printf("provider_init2-search_av-fi_getinfo %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
         gettimeofday(&tv_start2, NULL);
         while (NULL != prov) {
             MPIDI_OFI_CHOOSE_PROVIDER(prov, &prov_use, "No suitable provider provider found");
@@ -389,15 +389,15 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
 
         fi_freeinfo(prov);
         gettimeofday(&tv_stop2, NULL);
-        printf("provider_init-cap_check %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
+        printf("provider_init2-cap_check %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
     }
 
         gettimeofday(&tv_stop, NULL);
-        printf("provider_init-select_prov %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        printf("provider_init1-select_prov %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
     MPIDI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, hints, &prov), addrinfo);
         gettimeofday(&tv_stop, NULL);
-        printf("provider_init-fi_getinfo %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        printf("provider_init1-fi_getinfo %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
 
         gettimeofday(&tv_start, NULL);
     MPIDI_OFI_CHOOSE_PROVIDER(prov, &prov_use, "No suitable provider provider found");
@@ -631,7 +631,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
                                                      &MPIDI_Global.ep, 0));
 
         gettimeofday(&tv_stop, NULL);
-        printf("provider_init-prologue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        printf("provider_init1-prologue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     if (do_av_insert) {
         gettimeofday(&tv_start, NULL);
         int local_rank, num_local = 0, local_rank_0 = -1;
@@ -803,7 +803,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         MPL_strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
     gettimeofday(&tv_stop, NULL);
-    printf("provider_init-pro4 %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    printf("provider_init1-pro4 %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
 
   fn_exit:
 
