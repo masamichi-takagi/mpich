@@ -123,6 +123,8 @@ int MPI_Init( int *argc, char ***argv )
     int mpi_errno = MPI_SUCCESS;
     int rc ATTRIBUTE((unused));
     int threadLevel, provided;
+    struct timeval tv_start, tv_stop, tv_start2, tv_stop2;
+    gettimeofday(&tv_start, NULL);
     MPIR_FUNC_TERSE_INIT_STATE_DECL(MPID_STATE_MPI_INIT);
 
     rc = MPID_Wtime_init();
@@ -175,13 +177,10 @@ int MPI_Init( int *argc, char ***argv )
     if (MPIR_CVAR_ASYNC_PROGRESS)
         threadLevel = MPI_THREAD_MULTIPLE;
 
-    {
-        struct timeval tv_start, tv_stop;
-        gettimeofday(&tv_start, NULL);
+    gettimeofday(&tv_start2, NULL);
     mpi_errno = MPIR_Init_thread( argc, argv, threadLevel, &provided );
-    gettimeofday(&tv_stop, NULL);
-        printf("MPIR_Init_thread %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-    }    
+    gettimeofday(&tv_stop2, NULL);
+    printf("MPIR_Init_thread %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
     if (mpi_errno != MPI_SUCCESS) goto fn_fail;
 
     if (MPIR_CVAR_ASYNC_PROGRESS) {
@@ -198,6 +197,8 @@ int MPI_Init( int *argc, char ***argv )
 
     /* ... end of body of routine ... */
     MPIR_FUNC_TERSE_INIT_EXIT(MPID_STATE_MPI_INIT);
+    gettimeofday(&tv_stop, NULL);
+    printf("MPI_Init %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     return mpi_errno;
 
   fn_fail:

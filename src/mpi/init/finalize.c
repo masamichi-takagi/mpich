@@ -145,7 +145,7 @@ int MPI_Finalize( void )
 #if defined(HAVE_USLEEP) && defined(USE_COVERAGE)
     int rank=0;
 #endif
-    struct timeval tv_start, tv_stop;
+    struct timeval tv_start, tv_stop, tv_start2, tv_stop2;
     gettimeofday(&tv_start, NULL);
     MPIR_FUNC_TERSE_FINALIZE_STATE_DECL(MPID_STATE_MPI_FINALIZE);
 
@@ -236,16 +236,13 @@ int MPI_Finalize( void )
     MPIR_Debugger_set_aborting( (char *)0 );
 #endif
 
-    gettimeofday(&tv_stop, NULL);
-    printf("MPI_Finalize-prologue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-    gettimeofday(&tv_start, NULL);
+    gettimeofday(&tv_start2, NULL);
     mpi_errno = MPID_Finalize();
     if (mpi_errno) {
 	MPIR_ERR_POP(mpi_errno);
     }
-    gettimeofday(&tv_stop, NULL);
-    printf("MPID_Finalize %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-    gettimeofday(&tv_start, NULL);
+    gettimeofday(&tv_stop2, NULL);
+    printf("MPID_Finalize %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
 
     /* Call the low-priority (post Finalize) callbacks */
     MPIR_Call_finalize_callbacks( 0, MPIR_FINALIZE_CALLBACK_PRIO-1 );
@@ -315,7 +312,7 @@ int MPI_Finalize( void )
     /* ... end of body of routine ... */
   fn_exit:
     gettimeofday(&tv_stop, NULL);
-    printf("MPI_Finalize-epilogue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    printf("MPI_Finalize %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     MPIR_FUNC_TERSE_FINALIZE_EXIT(MPID_STATE_MPI_FINALIZE);
     return mpi_errno;
 

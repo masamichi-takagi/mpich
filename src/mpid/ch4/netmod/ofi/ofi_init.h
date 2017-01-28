@@ -717,11 +717,17 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
             MPIDI_OFI_AV(&MPIDIU_get_av(0, i)).dest = mapped_table[i];
         }
         MPL_free(mapped_table);
+        gettimeofday(&tv_stop, NULL);
+        printf("av_insert-av_insert %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        gettimeofday(&tv_start, NULL);
 
         PMI_Barrier();
+        gettimeofday(&tv_stop, NULL);
+        printf("av_insert-PMI_Barrier %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        gettimeofday(&tv_start, NULL);
         MPIDU_shm_seg_destroy(&memory, num_local);
         gettimeofday(&tv_stop, NULL);
-        printf("av_insert-epi %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        printf("av_insert-shm_seg_destroy %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     }
     gettimeofday(&tv_start, NULL);
 
