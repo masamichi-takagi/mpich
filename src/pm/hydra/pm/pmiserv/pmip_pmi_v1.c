@@ -499,9 +499,9 @@ static HYD_status fn_keyval_cache(int fd, char *args[])
 
     /* allocate a larger space for the cached keyvals, copy over the
      * older keyvals and add the new ones in */
+    MPL_HASH_CLEAR(hh, get_cache_hash);
     HYDU_REALLOC_OR_JUMP(get_cache, struct get_cache_elem *,
                          (sizeof(struct get_cache_elem) * (get_cache_num_elems + token_count)), status);
-    MPL_HASH_CLEAR(hh, get_cache_hash);
     for (i = 0; i < get_cache_num_elems; i++) {
         struct get_cache_elem *elem = get_cache + i;
         MPL_HASH_ADD_STR(get_cache_hash, key, elem);
