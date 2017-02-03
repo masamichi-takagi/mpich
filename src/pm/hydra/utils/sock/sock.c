@@ -147,14 +147,13 @@ HYD_status HYDU_sock_connect(const char *host, uint16_t port, int *fd, int retri
     /* Not being able to connect is not an error in all cases. So we
      * return an error, but only print a warning message. The upper
      * layer can decide what to do with the return status. */
-    printf("sock.c,connect(),retries=%d\n", retries);
     retry_count = 0;
     do {
         ret = connect(*fd, (struct sockaddr *) &sa, sizeof(struct sockaddr_in));
         if (ret < 0 && (errno == ECONNREFUSED || errno == ETIMEDOUT)) {
             /* connection error; increase retry count and delay */
             retry_count++;
-            printf("Retrying connection, retry_count=%d, retries=%d\n", retry_count, retries);
+            HYDU_error_printf("Retrying connection, retry_count=%d, retries=%d\n", retry_count, retries);
             if (retry_count > retries)
                 break;
             HYDU_delay(delay);
@@ -162,6 +161,7 @@ HYD_status HYDU_sock_connect(const char *host, uint16_t port, int *fd, int retri
         else
             break;
     } while (1);
+    HYDU_error_printf("Connection result=%d\n", ret);
 
     if (ret < 0) {
         char localhost[MAX_HOSTNAME_LEN] = { 0 };
