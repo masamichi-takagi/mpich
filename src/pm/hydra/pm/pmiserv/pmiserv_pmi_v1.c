@@ -137,6 +137,7 @@ static HYD_status fn_barrier_in(int fd, int pid, int pgid, char *args[])
 {
     struct HYD_proxy *proxy, *tproxy;
     HYD_status status = HYD_SUCCESS;
+    struct timeval tv_start, tv_stop;
 
     HYDU_FUNC_ENTER();
 
@@ -147,8 +148,11 @@ static HYD_status fn_barrier_in(int fd, int pid, int pgid, char *args[])
     if (proxy->pg->barrier_count == proxy->pg->proxy_count) {
         proxy->pg->barrier_count = 0;
 
+	gettimeofday(&tv_start, NULL);
         bcast_keyvals(fd, pid);
-
+	gettimeofday(&tv_stop, NULL);
+	printf("bcast_keyvals %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+	
         for (tproxy = proxy->pg->proxy_list; tproxy; tproxy = tproxy->next) {
             status = cmd_response(tproxy->control_fd, pid, "cmd=barrier_out\n");
             HYDU_ERR_POP(status, "error writing PMI line\n");

@@ -133,6 +133,8 @@ int main(int argc, char **argv)
     struct HYD_node *node;
     int exit_status = 0, i, timeout, user_provided_host_list, global_core_count;
     HYD_status status = HYD_SUCCESS;
+    char* buf = (char*)malloc(1024*1024*128);
+    setvbuf(stdout, buf, _IOFBF, 1024*1024*128);
 
     HYDU_FUNC_ENTER();
 
