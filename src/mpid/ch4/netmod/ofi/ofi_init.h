@@ -668,7 +668,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         gettimeofday(&tv_start, NULL);
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_rank_0, rank);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-shm_seg_commit %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-shm_seg_commit %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
 
         gettimeofday(&tv_start, NULL);
         /* -------------------------------- */
@@ -694,7 +694,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-PMI_Barrier %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-PMI_Barrier %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
         gettimeofday(&tv_start, NULL);
 
         /* -------------------------------- */
@@ -715,7 +715,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-PMI_Barrier %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-PMI_Barrier %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
         gettimeofday(&tv_start, NULL);
         MPIDU_shm_seg_destroy(&memory, num_local);
         gettimeofday(&tv_stop, NULL);

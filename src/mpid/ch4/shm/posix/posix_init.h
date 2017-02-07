@@ -125,7 +125,7 @@ static inline int MPIDI_POSIX_mpi_init_hook(int rank, int size)
         MPIR_ERR_POP(mpi_errno);
 
     gettimeofday(&tv_stop, NULL);
-    if(rank == 0) printf("shm_posix_init-shm_seg_commit %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    if(rank == 0) printf("shm_posix_init-shm_seg_commit %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
     gettimeofday(&tv_start, NULL);
 
     /* post check_alloc steps */
