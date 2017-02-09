@@ -149,7 +149,7 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
     void *start_addr ATTRIBUTE((unused));
     size_t size_left;
     struct timeval tv_start, tv_stop;
-    //gettimeofday(&tv_start, NULL);
+    gettimeofday(&tv_start, NULL);
 
     MPIR_CHKPMEM_DECL(1);
     MPIR_CHKLMEM_DECL(2);
@@ -198,9 +198,6 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
 
     memory->segment_len = segment_len;
 
-    //gettimeofday(&tv_stop, NULL);
-    //if(rank == 0) printf("shm_seg_commit-prologue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-    //gettimeofday(&tv_start, NULL);
 #ifdef USE_PMI2_API
     /* if there is only one process on this processor, don't use shared memory */
     if (num_local == 1)
@@ -339,9 +336,15 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
         mpi_errno = PMI_KVS_Get_my_name(kvs_name, 256);
         if (mpi_errno) MPIR_ERR_POP (mpi_errno);
 
+        gettimeofday(&tv_stop, NULL);
+        if(rank == 0 || rank == 63) printf("shm_seg_commit-pro %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        gettimeofday(&tv_start, NULL);
         if (local_rank == 0){
             mpi_errno = MPL_shm_seg_create_and_attach(memory->hnd, memory->segment_len, &(memory->base_addr), 0);
             if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP (mpi_errno);
+            gettimeofday(&tv_stop, NULL);
+            if(rank == 0 || rank == 63) printf("shm_seg_commit-mmap %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+            gettimeofday(&tv_start, NULL);
 
             /* post name of shared file */
             MPIR_Assert(local_procs_0 == rank);
@@ -366,22 +369,19 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
             mpi_errno = MPIDU_shm_barrier_init((MPIDU_shm_barrier_t *) memory->base_addr, barrier, TRUE);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
-            //gettimeofday(&tv_stop, NULL);
-            //if(rank == 0) printf("shm_seg_commit-PMI_KVS_Put %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-            //gettimeofday(&tv_start, NULL);
             pmi_errno = PMI_Barrier();
             MPIR_ERR_CHKANDJUMP1 (pmi_errno != PMI_SUCCESS, mpi_errno, MPI_ERR_OTHER, "**pmi_barrier", "**pmi_barrier %d", pmi_errno);
-            //gettimeofday(&tv_stop, NULL);
-            //if(rank == 0) printf("shm_seg_commit-PMI_Barrier_after_Put %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-            //gettimeofday(&tv_start, NULL);
+            gettimeofday(&tv_stop, NULL);
+            if(rank == 0 || rank == 63) printf("shm_seg_commit-PMI_Barrier %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+            gettimeofday(&tv_start, NULL);
         }
         else
         {
             pmi_errno = PMI_Barrier();
             MPIR_ERR_CHKANDJUMP1 (pmi_errno != PMI_SUCCESS, mpi_errno, MPI_ERR_OTHER, "**pmi_barrier", "**pmi_barrier %d", pmi_errno);
-            //gettimeofday(&tv_stop, NULL);
-            //if(rank == 0) printf("shm_seg_commit-PMI_Barrier_befor_Get %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-            //gettimeofday(&tv_start, NULL);
+            gettimeofday(&tv_stop, NULL);
+            if(rank == 0  || rank == 63) printf("shm_seg_commit-PMI_Barrier %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+            gettimeofday(&tv_start, NULL);
 
             /* get name of shared file */
             MPL_snprintf(key, key_max_sz, "sharedFilename[%i]-%i", local_procs_0, num_segments);
@@ -404,9 +404,9 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
 
             mpi_errno = MPIDU_shm_barrier_init((MPIDU_shm_barrier_t *) memory->base_addr, barrier, FALSE);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
-            //gettimeofday(&tv_stop, NULL);
-            //if(rank == 0) printf("shm_seg_commit-PMI_KVS_Get %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-            //gettimeofday(&tv_start, NULL);
+            gettimeofday(&tv_stop, NULL);
+            if(rank == 0 || rank == 63) printf("shm_seg_commit-PMI_KVS_Get %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+            gettimeofday(&tv_start, NULL);
         }
 
         mpi_errno = MPIDU_shm_barrier(*barrier, num_local);
@@ -464,9 +464,9 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
  fn_exit:
     MPIR_CHKLMEM_FREEALL();
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDU_SHM_SEG_COMMIT);
-    //gettimeofday(&tv_stop, NULL);
-    // if(rank == 0) printf("shm_seg_commit-Epilogue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-    //gettimeofday(&tv_start, NULL);
+    gettimeofday(&tv_stop, NULL);
+    if(rank == 0 || rank == 63) printf("shm_seg_commit-epi %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    gettimeofday(&tv_start, NULL);
     return mpi_errno;
  fn_fail:
     /* --BEGIN ERROR HANDLING-- */
