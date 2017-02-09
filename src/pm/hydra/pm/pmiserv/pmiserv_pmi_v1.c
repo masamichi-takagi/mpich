@@ -11,6 +11,8 @@
 #include "pmiserv_pmi.h"
 #include "pmiserv_utils.h"
 
+tv_put_t tv_put = { .ts = { .tv_sec = 0, .tv_usec = 0}, .sum = { .tv_sec = 0, .tv_usec = 0} };
+
 static HYD_status cmd_response(int fd, int pid, const char *cmd)
 {
     struct HYD_pmcd_hdr hdr;
@@ -148,10 +150,14 @@ static HYD_status fn_barrier_in(int fd, int pid, int pgid, char *args[])
     if (proxy->pg->barrier_count == proxy->pg->proxy_count) {
         proxy->pg->barrier_count = 0;
 
+        printf("put_sum %ld.%06ld %ld.%06ld\n", tv_put.sum.tv_sec, tv_put.sum.tv_usec, tv_put.ts.tv_sec, tv_put.ts.tv_usec);
+        tv_put.sum.tv_sec = 0;
+        tv_put.sum.tv_usec = 0;
+
 	gettimeofday(&tv_start, NULL);
         bcast_keyvals(fd, pid);
 	gettimeofday(&tv_stop, NULL);
-	printf("bcast_keyvals %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+	printf("bcast_keyvals %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
 	
         for (tproxy = proxy->pg->proxy_list; tproxy; tproxy = tproxy->next) {
             status = cmd_response(tproxy->control_fd, pid, "cmd=barrier_out\n");
@@ -174,7 +180,8 @@ static HYD_status fn_put(int fd, int pid, int pgid, char *args[])
     struct HYD_pmcd_token *tokens;
     int token_count, i, ret;
     HYD_status status = HYD_SUCCESS;
-
+    struct timeval tv_start, tv_stop;
+    gettimeofday(&tv_start, NULL);
     HYDU_FUNC_ENTER();
 
     status = HYD_pmcd_pmi_args_to_tokens(args, &tokens, &token_count);
@@ -192,6 +199,18 @@ static HYD_status fn_put(int fd, int pid, int pgid, char *args[])
   fn_exit:
     HYD_pmcd_pmi_free_tokens(tokens, token_count);
     HYDU_FUNC_EXIT();
+    gettimeofday(&tv_stop, NULL);
+    //printf("put %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+
+    tv_put.ts = tv_stop;
+    suseconds_t usec = tv_stop.tv_usec - tv_start.tv_usec;
+    time_t sec = tv_stop.tv_sec - tv_start.tv_sec;
+    if(usec < 0) {
+        sec--;
+        usec += 1000000;
+    }
+    tv_put.sum.tv_usec += usec;
+    tv_put.sum.tv_sec += sec;
     return status;
 
   fn_fail:

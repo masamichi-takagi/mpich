@@ -317,7 +317,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
     hints->rx_attr->total_buffered_recv = 0;    /* FI_RM_ENABLED ensures buffering of unexpected messages */
     hints->ep_attr->type = FI_EP_RDM;
     gettimeofday(&tv_stop, NULL);
-    if(rank == 0) printf("provider_init1-set_caps %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    if(rank == 0) printf("provider_init1-set_caps %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     gettimeofday(&tv_start, NULL);
 
     /* ------------------------------------------------------------------------ */
@@ -333,7 +333,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         gettimeofday(&tv_start2, NULL);
         MPIDI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, NULL, &prov), addrinfo);
         gettimeofday(&tv_stop2, NULL);
-        if(rank == 0) printf("provider_init2-search_av-fi_getinfo %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
+        if(rank == 0) printf("provider_init2-search_av-fi_getinfo %.6f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
         gettimeofday(&tv_start2, NULL);
         while (NULL != prov) {
             MPIDI_OFI_CHOOSE_PROVIDER(prov, &prov_use, "No suitable provider provider found");
@@ -381,15 +381,15 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
 
         fi_freeinfo(prov);
         gettimeofday(&tv_stop2, NULL);
-        if(rank == 0) printf("provider_init2-cap_check %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
+        if(rank == 0) printf("provider_init2-cap_check %.6f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
     }
 
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("provider_init1-select_prov %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("provider_init1-select_prov %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
     MPIDI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, hints, &prov), addrinfo);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("provider_init1-fi_getinfo %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("provider_init1-fi_getinfo %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
 
         gettimeofday(&tv_start, NULL);
     MPIDI_OFI_CHOOSE_PROVIDER(prov, &prov_use, "No suitable provider provider found");
@@ -619,7 +619,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
                                                      &MPIDI_Global.ep, 0));
 
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("provider_init1-prologue %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("provider_init1-prologue %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     if (do_av_insert) {
         gettimeofday(&tv_start, NULL);
         int local_rank, num_local = 0, local_rank_0 = -1;
@@ -664,11 +664,11 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
 
         MPIDU_shm_seg_alloc(size * MPIDI_Global.addrnamelen, (void **)&table);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-PMI_KVS_Put %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-PMI_KVS_Put %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
         MPIDU_shm_seg_commit(&memory, &barrier, num_local, local_rank, local_rank_0, rank);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-shm_seg_commit %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+        if(rank == 0) printf("av_insert-shm_seg_commit %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
 
         gettimeofday(&tv_start, NULL);
         /* -------------------------------- */
@@ -688,13 +688,13 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
                                 MPIDI_Global.addrnamelen, &maxlen), buscard_len);
         }
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-PMI_KVS_Get %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-PMI_KVS_Get %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
         mpi_errno = MPIDU_shm_barrier(barrier, num_local);
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-PMI_Barrier %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+        if(rank == 0) printf("av_insert-shm_barrier %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
 
         /* -------------------------------- */
@@ -708,18 +708,24 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         }
         MPL_free(mapped_table);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-av_insert %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-av_insert %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
 
         mpi_errno = MPIDU_shm_barrier(barrier, num_local);
         if (mpi_errno)
             MPIR_ERR_POP(mpi_errno);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-PMI_Barrier %8.8f %ld.%ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+        if(rank == 0) printf("av_insert-shm_barrier %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
+
+        MPIDI_OFI_PMI_CALL_POP(PMI_Barrier(), pmi); /* Debug: Eliminate load imbalance among nodes */
+        gettimeofday(&tv_stop, NULL);
+        if(rank == 0) printf("av_insert-PMI_Barrier %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+        gettimeofday(&tv_start, NULL);
+
         MPIDU_shm_seg_destroy(&memory, num_local);
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("av_insert-shm_seg_destroy %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0) printf("av_insert-shm_seg_destroy %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     }
     gettimeofday(&tv_start, NULL);
 
@@ -801,7 +807,7 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         MPL_strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
     gettimeofday(&tv_stop, NULL);
-    if(rank == 0) printf("provider_init1-pro4 %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    if(rank == 0) printf("provider_init1-pro4 %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
 
   fn_exit:
 

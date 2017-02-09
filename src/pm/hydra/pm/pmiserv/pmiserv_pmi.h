@@ -23,6 +23,11 @@ return x;
 }
 extern uint64_t rdtsc_sum[16];
 extern uint64_t rdtsc_start;
+typedef struct tv_put {
+    struct timeval sum;
+    struct timeval ts; /* Time stamp of the last put */
+} tv_put_t;
+extern tv_put_t tv_put;
 
 /* PMI-1 specific definitions */
 extern struct HYD_pmcd_pmi_handle *HYD_pmcd_pmi_v1;

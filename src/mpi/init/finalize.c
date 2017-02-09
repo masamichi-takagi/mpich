@@ -242,7 +242,7 @@ int MPI_Finalize( void )
 	MPIR_ERR_POP(mpi_errno);
     }
     gettimeofday(&tv_stop2, NULL);
-    if(MPIR_Process.comm_world->rank == 0) printf("MPID_Finalize %8.8f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
+    if(MPIR_Process.comm_world->rank == 0) printf("MPID_Finalize %.6f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
 
     /* Call the low-priority (post Finalize) callbacks */
     MPIR_Call_finalize_callbacks( 0, MPIR_FINALIZE_CALLBACK_PRIO-1 );
@@ -312,7 +312,7 @@ int MPI_Finalize( void )
     /* ... end of body of routine ... */
   fn_exit:
     gettimeofday(&tv_stop, NULL);
-    if(MPIR_Process.comm_world->rank == 0) printf("MPI_Finalize %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    if(MPIR_Process.comm_world->rank == 0) printf("MPI_Finalize %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     MPIR_FUNC_TERSE_FINALIZE_EXIT(MPID_STATE_MPI_FINALIZE);
     return mpi_errno;
 

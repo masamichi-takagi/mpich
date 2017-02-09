@@ -508,7 +508,7 @@ int MPIR_Init_thread(int * argc, char ***argv, int required, int * provided)
     mpi_errno = MPID_Init(argc, argv, required, &thread_provided, 
 			  &has_args, &has_env);
     gettimeofday(&tv_stop, NULL);
-    if(MPIR_Process.comm_world->rank == 0) printf("MPID_Init %8.8f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    if(MPIR_Process.comm_world->rank == 0) printf("MPID_Init %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         
     if (mpi_errno) MPIR_ERR_POP(mpi_errno);
 
