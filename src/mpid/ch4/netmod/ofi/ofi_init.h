@@ -621,6 +621,13 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         MPIDU_shm_barrier_t *barrier;
         int start, end;
 
+#if 1
+        MPIDI_OFI_PMI_CALL_POP(PMI_Barrier(), pmi); /* Debug: Eliminate load imbalance because of serial launch */
+        gettimeofday(&tv_stop, NULL);
+        if(rank == 0) printf("av_insert-PMI_Barrier %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+        gettimeofday(&tv_start, NULL);
+#endif
+
         /* ---------------------------------- */
         /* Get our endpoint name and publish  */
         /* the socket to the KVS              */
