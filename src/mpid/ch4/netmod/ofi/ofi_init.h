@@ -316,9 +316,6 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
     hints->rx_attr->op_flags = FI_COMPLETION;
     hints->rx_attr->total_buffered_recv = 0;    /* FI_RM_ENABLED ensures buffering of unexpected messages */
     hints->ep_attr->type = FI_EP_RDM;
-    gettimeofday(&tv_stop, NULL);
-    if(rank == 0) printf("provider_init1-set_caps %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-    gettimeofday(&tv_start, NULL);
 
     /* ------------------------------------------------------------------------ */
     /* fi_getinfo:  returns information about fabric  services for reaching a   */
@@ -384,9 +381,6 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         if(rank == 0) printf("provider_init2-cap_check %.6f\n", (tv_stop2.tv_sec - tv_start2.tv_sec) + (tv_stop2.tv_usec - tv_start2.tv_usec)/1000000.0);
     }
 
-        gettimeofday(&tv_stop, NULL);
-        if(rank == 0) printf("provider_init1-select_prov %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
-        gettimeofday(&tv_start, NULL);
     MPIDI_OFI_CALL(fi_getinfo(fi_version, NULL, NULL, 0ULL, hints, &prov), addrinfo);
         gettimeofday(&tv_stop, NULL);
         if(rank == 0) printf("provider_init1-fi_getinfo %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
@@ -806,8 +800,6 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
         MPIR_Assert(MPIR_Process.comm_parent != NULL);
         MPL_strncpy(MPIR_Process.comm_parent->name, "MPI_COMM_PARENT", MPI_MAX_OBJECT_NAME);
     }
-    gettimeofday(&tv_stop, NULL);
-    if(rank == 0) printf("provider_init1-pro4 %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
 
   fn_exit:
 
@@ -825,6 +817,8 @@ static inline int MPIDI_NM_mpi_init_hook(int rank,
     fi_freeinfo(hints);
 
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_NETMOD_OFI_INIT);
+    gettimeofday(&tv_stop, NULL);
+    if(rank == 0) printf("provider_init1-epi %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     return mpi_errno;
   fn_fail:
     goto fn_exit;

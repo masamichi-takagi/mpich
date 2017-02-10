@@ -337,13 +337,13 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
         if (mpi_errno) MPIR_ERR_POP (mpi_errno);
 
         gettimeofday(&tv_stop, NULL);
-        if(rank == 0 || rank == 63) printf("shm_seg_commit-pro %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+        if(rank == 0 || rank == 63) printf("[%d] shm_seg_commit-pro %.6f\n", rank, (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
         gettimeofday(&tv_start, NULL);
         if (local_rank == 0){
             mpi_errno = MPL_shm_seg_create_and_attach(memory->hnd, memory->segment_len, &(memory->base_addr), 0);
             if (mpi_errno != MPI_SUCCESS) MPIR_ERR_POP (mpi_errno);
             gettimeofday(&tv_stop, NULL);
-            if(rank == 0 || rank == 63) printf("shm_seg_commit-mmap %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+            if(rank == 0 || rank == 63) printf("[%d] shm_seg_commit-mmap %.6f\n", rank, (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
             gettimeofday(&tv_start, NULL);
 
             /* post name of shared file */
@@ -372,7 +372,7 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
             pmi_errno = PMI_Barrier();
             MPIR_ERR_CHKANDJUMP1 (pmi_errno != PMI_SUCCESS, mpi_errno, MPI_ERR_OTHER, "**pmi_barrier", "**pmi_barrier %d", pmi_errno);
             gettimeofday(&tv_stop, NULL);
-            if(rank == 0 || rank == 63) printf("shm_seg_commit-PMI_Barrier %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+            if(rank == 0 || rank == 63) printf("[%d] shm_seg_commit-PMI_Barrier %.6f %ld.%06ld\n", rank, (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
             gettimeofday(&tv_start, NULL);
         }
         else
@@ -380,7 +380,7 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
             pmi_errno = PMI_Barrier();
             MPIR_ERR_CHKANDJUMP1 (pmi_errno != PMI_SUCCESS, mpi_errno, MPI_ERR_OTHER, "**pmi_barrier", "**pmi_barrier %d", pmi_errno);
             gettimeofday(&tv_stop, NULL);
-            if(rank == 0  || rank == 63) printf("shm_seg_commit-PMI_Barrier %.6f %ld.%06ld\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
+            if(rank == 0  || rank == 63) printf("[%d] shm_seg_commit-PMI_Barrier %.6f %ld.%06ld\n", rank, (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0, tv_stop.tv_sec, tv_stop.tv_usec);
             gettimeofday(&tv_start, NULL);
 
             /* get name of shared file */
@@ -405,7 +405,7 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
             mpi_errno = MPIDU_shm_barrier_init((MPIDU_shm_barrier_t *) memory->base_addr, barrier, FALSE);
             if (mpi_errno) MPIR_ERR_POP(mpi_errno);
             gettimeofday(&tv_stop, NULL);
-            if(rank == 0 || rank == 63) printf("shm_seg_commit-PMI_KVS_Get %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+            if(rank == 0 || rank == 63) printf("[%d] shm_seg_commit-PMI_KVS_Get %.6f\n", rank, (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
             gettimeofday(&tv_start, NULL);
         }
 
@@ -465,7 +465,7 @@ int MPIDU_shm_seg_commit(MPIDU_shm_seg_ptr_t memory, MPIDU_shm_barrier_ptr_t *ba
     MPIR_CHKLMEM_FREEALL();
     MPIR_FUNC_VERBOSE_EXIT(MPID_STATE_MPIDU_SHM_SEG_COMMIT);
     gettimeofday(&tv_stop, NULL);
-    if(rank == 0 || rank == 63) printf("shm_seg_commit-epi %.6f\n", (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
+    if(rank == 0 || rank == 63) printf("[%d] shm_seg_commit-epi %.6f\n", rank, (tv_stop.tv_sec - tv_start.tv_sec) + (tv_stop.tv_usec - tv_start.tv_usec)/1000000.0);
     gettimeofday(&tv_start, NULL);
     return mpi_errno;
  fn_fail:
