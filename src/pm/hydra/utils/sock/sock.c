@@ -501,7 +501,7 @@ HYD_status HYDU_sock_get_iface_ip(char *iface, char **ip)
 }
 
 #if defined(HAVE_GETIFADDRS) && defined (HAVE_INET_NTOP)
-HYD_status HYDU_sock_is_local(char *host, int *is_local)
+HYD_status HYDU_sock_is_local(char *host, int *is_local, char** lhost_ip_cache)
 {
     struct hostent *ht;
     char *host_ip = NULL, *lhost_ip = NULL;
@@ -526,6 +526,7 @@ HYD_status HYDU_sock_is_local(char *host, int *is_local)
      */
 
 
+
     /* STEP 1: If "host" matches the local host name, return */
     if (gethostname(lhost, MAX_HOSTNAME_LEN) < 0) {
         /* We can't figure out what my localhost name is.  *sigh*.  We
@@ -546,8 +547,9 @@ HYD_status HYDU_sock_is_local(char *host, int *is_local)
         /* If we are unable to resolve the remote host name, it need
          * not be an error. It could mean that the user is using an
          * alias for the hostname (e.g., an ssh config alias) */
-        if ((ht = gethostbyname(host)) == NULL)
+        if ((ht = gethostbyname(host)) == NULL) {
             goto fn_exit;
+        }
 
         memset((char *) &sa, 0, sizeof(struct sockaddr_in));
         memcpy(&sa.sin_addr, ht->h_addr_list[0], ht->h_length);
@@ -563,24 +565,31 @@ HYD_status HYDU_sock_is_local(char *host, int *is_local)
      * both.  */
 
     /* STEP 2: Let's try the gethostbyname model */
+    if(*lhost_ip_cache == NULL) {
+        ht = gethostbyname(lhost);
+        if (ht == NULL) {
+            goto step3;
+        }
 
-    if ((ht = gethostbyname(lhost))) {
         memset((char *) &sa, 0, sizeof(struct sockaddr_in));
         memcpy(&sa.sin_addr, ht->h_addr_list[0], ht->h_length);
-
+            
         /* Find the IP address of the host */
         lhost_ip = MPL_strdup((char *) inet_ntop(AF_INET, (const void *) &sa.sin_addr, buf,
                                                  MAX_HOSTNAME_LEN));
         HYDU_ASSERT(lhost_ip, status);
-
-        /* See if the IP address of the hostname we got matches the IP
-         * address to which the local host resolves */
-        if (!strcmp(lhost_ip, host_ip)) {
-            *is_local = 1;
-            goto fn_exit;
-        }
+        
+        *lhost_ip_cache = MPL_strdup(lhost_ip);
     }
 
+    /* See if the IP address of the hostname we got matches the IP
+     * address to which the local host resolves */
+    if (!strcmp(*lhost_ip_cache, host_ip)) {
+        *is_local = 1;
+        goto fn_exit;
+    }
+
+step3:
     /* Either gethostbyname didn't resolve or we didn't find a match.
      * Either way, let's try the getifaddr model. */
 

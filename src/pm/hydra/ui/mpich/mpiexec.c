@@ -125,7 +125,7 @@ static HYD_status qsort_node_list(void)
   fn_fail:
     goto fn_exit;
 }
-
+char* lhost_ip_cache;
 int main(int argc, char **argv)
 {
     struct HYD_proxy *proxy;
@@ -285,7 +285,7 @@ int main(int argc, char **argv)
         for (node = HYD_server_info.node_list; node; node = node->next) {
             int is_local;
 
-            status = HYDU_sock_is_local(node->hostname, &is_local);
+            status = HYDU_sock_is_local(node->hostname, &is_local, &lhost_ip_cache);
             HYDU_ERR_POP(status, "unable to check if %s is local\n", node->hostname);
 
             if (is_local)

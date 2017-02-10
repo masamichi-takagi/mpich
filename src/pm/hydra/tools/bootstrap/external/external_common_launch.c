@@ -97,6 +97,8 @@ static HYD_status sge_get_path(char **path)
     goto fn_exit;
 }
 
+char* lhost_ip_cache;
+
 HYD_status HYDT_bscd_common_launch_procs(char **args, struct HYD_proxy *proxy_list, int use_rmk,
                                          int *control_fd)
 {
@@ -212,7 +214,6 @@ HYD_status HYDT_bscd_common_launch_procs(char **args, struct HYD_proxy *proxy_li
 
     targs[idx] = NULL;
     for (proxy = proxy_list; proxy; proxy = proxy->next) {
-
         if (targs[host_idx])
             MPL_free(targs[host_idx]);
         if (proxy->node->user == NULL) {
@@ -231,7 +232,7 @@ HYD_status HYDT_bscd_common_launch_procs(char **args, struct HYD_proxy *proxy_li
         targs[idx] = HYDU_int_to_str(proxy->proxy_id);
         targs[idx + 1] = NULL;
 
-        status = HYDU_sock_is_local(proxy->node->hostname, &lh);
+        status = HYDU_sock_is_local(proxy->node->hostname, &lh, &lhost_ip_cache);
         HYDU_ERR_POP(status, "error checking if node is localhost\n");
 
         /* If launcher is 'fork', or this is the localhost, use fork
